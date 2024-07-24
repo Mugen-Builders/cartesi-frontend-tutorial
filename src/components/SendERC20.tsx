@@ -1,24 +1,31 @@
 import React, { useState } from "react";
-import { BaseError, useWriteContract } from "wagmi";
-import { ABIs } from "../utils/abi";
-import { contractAddresses } from "../utils/addresses";
-import { Address, erc20Abi, parseEther, stringToHex, Hex } from "viem";
+import { BaseError } from "wagmi";
+import {
+  erc20PortalAddress,
+  useWriteErc20Approve,
+  useWriteErc20PortalDepositErc20Tokens,
+} from "../hooks/generated";
+import { Address, parseEther, stringToHex, Hex } from "viem";
 
 const SendERC20 = () => {
   const dAppAddress = `0xab7528bb862fb57e8a2bcd567a2e929a0be56a5e`;
   const [erc20Value, setErc20Value] = useState("");
   const [tokenAddress, setTokenAddress] = useState<Address | null>();
 
-  const { isPending, isSuccess, error, writeContractAsync } =
-    useWriteContract();
+  const {
+    isPending,
+    isSuccess,
+    error,
+    writeContractAsync: depositToken,
+  } = useWriteErc20PortalDepositErc20Tokens();
 
-  const approveERC20 = async (tokenAddress: Address, amount: string) => {
+  const { writeContractAsync: approveToken } = useWriteErc20Approve();
+
+  const approve = async (address: Address, amount: string) => {
     try {
-      await writeContractAsync({
-        address: tokenAddress,
-        abi: erc20Abi,
-        functionName: "approve",
-        args: [contractAddresses.Erc20Portal as Hex, parseEther(amount)],
+      await approveToken({
+        address,
+        args: [erc20PortalAddress, parseEther(amount)],
       });
       console.log("ERC20 Approval successful");
     } catch (error) {
@@ -30,12 +37,9 @@ const SendERC20 = () => {
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const data = stringToHex(`Deposited (${erc20Value}).`);
-    await approveERC20(tokenAddress as Address, erc20Value);
-    await writeContractAsync({
-      address: contractAddresses.Erc20Portal as Hex,
-      abi: ABIs.ERC20PortalABI,
-      functionName: "depositERC20Tokens",
-      args: [tokenAddress, dAppAddress, parseEther(erc20Value), data],
+    await approve(tokenAddress as Address, erc20Value);
+    await depositToken({
+      args: [tokenAddress as Hex, dAppAddress, parseEther(erc20Value), data],
     });
   }
 

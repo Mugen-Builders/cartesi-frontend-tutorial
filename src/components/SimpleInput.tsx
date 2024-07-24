@@ -1,22 +1,18 @@
 import React, { useState } from "react";
-import { BaseError, useWriteContract } from "wagmi";
-import { ABIs } from "../utils/abi";
-import { contractAddresses } from "../utils/addresses";
-import { Hex, stringToHex } from "viem";
+import { BaseError } from "wagmi";
+import { useWriteInputBoxAddInput } from "../hooks/generated";
+import { stringToHex } from "viem";
 
 const SimpleInput = () => {
   const dAppAddress = `0xab7528bb862fb57e8a2bcd567a2e929a0be56a5e`;
   const [inputValue, setInputValue] = useState("");
 
   const { isPending, isSuccess, error, writeContractAsync } =
-    useWriteContract();
+    useWriteInputBoxAddInput();
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     await writeContractAsync({
-      address: contractAddresses.InputBox as Hex,
-      abi: ABIs.InputBoxABI,
-      functionName: "addInput",
       args: [dAppAddress, stringToHex(inputValue)],
     });
   }

@@ -1,23 +1,24 @@
 import React, { useState } from "react";
-import { BaseError, useWriteContract } from "wagmi";
-import { ABIs } from "../utils/abi";
-import { contractAddresses } from "../utils/addresses";
+import { BaseError } from "wagmi";
+import { useWriteEtherPortalDepositEther } from "../hooks/generated";
 
-import { Hex, parseEther, stringToHex } from "viem";
+import { parseEther, stringToHex } from "viem";
 
 const SendEther = () => {
   const dAppAddress = `0xab7528bb862fb57e8a2bcd567a2e929a0be56a5e`;
   const [etherValue, setEtherValue] = useState("");
 
-  const { isPending, isSuccess, error, writeContractAsync } = useWriteContract();
+  const {
+    isPending,
+    isSuccess,
+    error,
+    writeContractAsync: depositToken,
+  } = useWriteEtherPortalDepositEther();
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const data = stringToHex(`Deposited (${etherValue}) ether.`);
-    await writeContractAsync({
-      address: contractAddresses.EtherPortal as Hex,
-      abi: ABIs.EtherPortalABI,
-      functionName: "depositEther",
+    await depositToken({
       args: [dAppAddress, data],
       value: parseEther(etherValue),
     });
