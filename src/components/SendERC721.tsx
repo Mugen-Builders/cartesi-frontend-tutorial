@@ -4,6 +4,7 @@ import {
   erc721PortalAddress,
   useWriteErc721Approve,
   useWriteErc721PortalDepositErc721Token,
+  useWriteCartesiDAppFactory
 } from "../hooks/generated";
 import { stringToHex, Address, Hex } from "viem";
 

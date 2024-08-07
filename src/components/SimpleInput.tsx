@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import { BaseError } from "wagmi";
 import { useWriteInputBoxAddInput } from "../hooks/generated";
-import { stringToHex } from "viem";
+import { Hex, stringToHex } from "viem";
 
 const SimpleInput = () => {
   const dAppAddress = `0xab7528bb862fb57e8a2bcd567a2e929a0be56a5e`;
   const [inputValue, setInputValue] = useState("");
+  const [hexInput, setHexInput] = useState<boolean>(false);
 
   const { isPending, isSuccess, error, writeContractAsync } =
     useWriteInputBoxAddInput();
@@ -13,7 +14,10 @@ const SimpleInput = () => {
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     await writeContractAsync({
-      args: [dAppAddress, stringToHex(inputValue)],
+      args: [
+        dAppAddress,
+        hexInput ? (inputValue as Hex) : stringToHex(inputValue),
+      ],
     });
   }
 
@@ -29,6 +33,12 @@ const SimpleInput = () => {
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
           />
+          <input
+            type="checkbox"
+            checked={hexInput}
+            onChange={(e) => setHexInput(!hexInput)}
+          />
+          <span>Raw Hex </span>
         </div>
         <button
           type="submit"
